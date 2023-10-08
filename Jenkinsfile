@@ -11,5 +11,10 @@ pipeline{
                 git branch: 'main', credentialsId: 'github', url: 'https://github.com/mukeshr-29/devops-project-9.git'
             }
         }
+        stage('unit testing'){
+            steps{
+                sh 'mvn test'
+            }
+        }
     }
 }
