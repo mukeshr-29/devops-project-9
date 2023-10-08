@@ -21,5 +21,10 @@ pipeline{
                 sh 'mvn verify -DskipUnitTests'
             }
         }
+        stage('build application artifact'){
+            steps{
+                sh 'mvn clean install'
+            }
+        }
     }
 }
