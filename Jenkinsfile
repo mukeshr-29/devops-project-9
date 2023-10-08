@@ -28,8 +28,10 @@ pipeline{
         }
         stage('static ccode analysis'){
             steps{
+                script{
                 withSonarQubeEnv(credentialsId: 'sonarqube'){
                     sh 'mvn clean package sonar:sonar'
+                    }
                 }
             }
         }
