@@ -3,7 +3,7 @@ pipeline{
     stages{
         stage('clean work space'){
             steps{
-                cleanWS()
+                deleteDir()
             }
         }
         stage('git checkout'){
