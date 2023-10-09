@@ -26,7 +26,7 @@ pipeline{
                 sh 'mvn clean install'
             }
         }
-        stage('static ccode analysis'){
+        stage('static code analysis'){
             steps{
                 script{
                     withSonarQubeEnv(credentialsId: 'sonarqube'){
@@ -39,6 +39,13 @@ pipeline{
             steps{
                 script{
                     waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube'
+                }
+            }
+        }
+        stage('mavenbuild:maven'){
+            steps{
+                script{
+                    mvnBuild()
                 }
             }
         }
