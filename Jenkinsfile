@@ -1,90 +1,50 @@
 pipeline{
     agent any
+    parameters{
+        choice(name: 'action',choices: 'create\ndestroy\ndestroyekscluster', description: 'Create/Update or destroy the eks cluster')
+        string(name: 'cluster', defaultValue: 'project-cluster',description: 'Eks cluster name')
+        string(name: 'regions', defaultValue: 'us-east-1',description: 'Eks cluster region')
+    }
+    environment{
+        ACCESS_KEY = credentials('aws_access_key_id')
+        SECRET_KEY = credentials('aws_secret_access_key_id')
+    }
     stages{
-        stage('clean work space'){
-            steps{
-                deleteDir()
-            }
-        }
-        stage('git checkout'){
+        stage("git checkout"){
             steps{
                 git branch: 'main', credentialsId: 'github', url: 'https://github.com/mukeshr-29/devops-project-9.git'
             }
         }
-        stage('unit testing'){
+        stage("eks connect"){
             steps{
-                sh 'mvn test'
+                sh """
+                   aws configure set aws_access_key_id "$ACCESS_KEY"
+                   aws configure set aws_secret_access_key_id "$SECRET_KEY"
+                   aws configure set region ""
+                   aws eks --region ${params.region} update-kubeconfig --name ${params.cluster}
+                    """
             }
         }
-        stage('integration test'){
-            steps{
-                sh 'mvn verify -DskipUnitTests'
-            }
-        }
-        stage('build application artifact'){
-            steps{
-                sh 'mvn clean install'
-            }
-        }
-        stage('static code analysis'){
-            steps{
-                script{
-                    withSonarQubeEnv(credentialsId: 'sonarqube'){
-                        sh 'mvn clean package sonar:sonar'
-                    }
-                }
-            }
-        }
-        stage('quality gate'){
-            steps{
-                script{
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube'
-                }
-            }
-        }
-        stage('upload jar file to nexus'){
-            steps{
-                script{
-                    def readPomVersion = readMavenPom file: 'pom.xml'
-
-                    def nexusRepo = readPomVersion.version.endsWith("SNAPSHOT") ? "devops-project-9-snapshot" : "devops-project-9-release"
-                    nexusArtifactUploader artifacts: 
-                    [
-                        [
-                            artifactId: 'springboot', 
-                            classifier: '', 
-                            file: 'target/Uber.jar', 
-                            type: 'jar'
-                        ]
-                    ], 
-                    credentialsId: 'nexus',
-                    groupId: 'com.example', 
-                    nexusUrl: '10.0.0.117:8081', 
-                    nexusVersion: 'nexus3', 
-                    protocol: 'http', 
-                    repository: nexusRepo, 
-                    version: "${readPomVersion.version}"
-                }
-            }
-        }
-        stage('docker image build'){
-            steps{
-                script{
-                    sh 'docker image build -t $JOB_NAME:v1.$BUILD_ID .'
-                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID mukeshr29/$JOB_NAME:v1.$BUILD_ID'
-                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID mukeshr29/$JOB_NAME:latest'
-                }
-            }
-        }
-        stage('push image to dockerhub'){
-            steps{
-                script{
-                    withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerhub')]){
-                        sh 'docker login -u mukeshr29 -p ${dockerhub}'
-                        sh 'docker image push mukeshr29/$JOB_NAME:v1.$BUILD_ID'
-                    }
-                }
-            }
-        }
+        // stage("eks deployment"){
+        //     when { expression { params.action == 'create'}}
+        //     steps{
+        //         scripts{
+        //             def apply = false
+        //             try{
+        //                 input message: 'please confirm the apply to innitiate the deployments', ok: 'Ready to apply the config'
+        //                 apply = true
+        //             }
+        //             catch(err){
+        //                 apply = false
+        //                 CurrentBuild.result= 'UNSTABLE'
+        //             }
+        //             if(apply){
+        //                 sh """ 
+        //                     kubectl apply -f .
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
