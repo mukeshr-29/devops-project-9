@@ -19,11 +19,12 @@ pipeline{
             steps{
                 withCredentials([string(credentialsId: 'aws_access_key_id', variable: 'ACCESS_KEY'), string(credentialsId: 'aws_secret_access_key_id', variable: 'SECRET_KEY')]) {
                     sh """
-                        aws eks --region ${params.region} update-kubeconfig --name ${params.cluster}
-                        """
+                         aws eks --region ${params.regions} update-kubeconfig --name ${params.cluster}
+                     """
         }
     }
 }
+
 
         // stage("eks deployment"){
         //     when { expression { params.action == 'create'}}
