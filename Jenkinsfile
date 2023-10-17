@@ -16,15 +16,15 @@ pipeline{
             }
         }
         stage("eks connect"){
-            steps{
-                sh """
-                   aws configure set aws_access_key_id "$ACCESS_KEY"
-                   aws configure set aws_secret_access_key "$SECRET_KEY"
-                   aws configure set region ""
-                   aws eks --region ${params.region} update-kubeconfig --name ${params.cluster}
-                    """
-            }
+    steps{
+        withCredentials([string(credentialsId: 'aws_access_key_id', variable: 'ACCESS_KEY'), string(credentialsId: 'aws_secret_access_key_id', variable: 'SECRET_KEY')]) {
+            sh """
+               aws eks --region ${params.region} update-kubeconfig --name ${params.cluster}
+            """
         }
+    }
+}
+
         // stage("eks deployment"){
         //     when { expression { params.action == 'create'}}
         //     steps{
