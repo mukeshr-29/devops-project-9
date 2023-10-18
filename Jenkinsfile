@@ -27,7 +27,7 @@ pipeline{
         stage("eks deployment"){
             when { expression { params.action == 'create'}}
             steps{
-                scripts{
+                script{
                     def apply = false
                     try{
                         input message: 'please confirm the apply to innitiate the deployments', ok: 'Ready to apply the config'
