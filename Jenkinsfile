@@ -21,31 +21,29 @@ pipeline{
                     sh """
                          aws eks --region ${params.regions} update-kubeconfig --name ${params.cluster}
                      """
+                }
+            }
         }
-    }
-}
-
-
-        // stage("eks deployment"){
-        //     when { expression { params.action == 'create'}}
-        //     steps{
-        //         scripts{
-        //             def apply = false
-        //             try{
-        //                 input message: 'please confirm the apply to innitiate the deployments', ok: 'Ready to apply the config'
-        //                 apply = true
-        //             }
-        //             catch(err){
-        //                 apply = false
-        //                 CurrentBuild.result= 'UNSTABLE'
-        //             }
-        //             if(apply){
-        //                 sh """ 
-        //                     kubectl apply -f .
-        //                 """
-        //             }
-        //         }
-        //     }
-        // }
+        stage("eks deployment"){
+            when { expression { params.action == 'create'}}
+            steps{
+                scripts{
+                    def apply = false
+                    try{
+                        input message: 'please confirm the apply to innitiate the deployments', ok: 'Ready to apply the config'
+                        apply = true
+                    }
+                    catch(err){
+                        apply = false
+                        CurrentBuild.result= 'UNSTABLE'
+                    }
+                    if(apply){
+                        sh """ 
+                            kubectl apply -f .
+                        """
+                    }
+                }
+            }
+        }
     }
 }
