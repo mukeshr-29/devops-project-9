@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: myservice
-  label: 
+  labels: 
     app: project-9
 spec:
   selector:
