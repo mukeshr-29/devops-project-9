@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: project-9
-        image: mukeshr29/project-9
+        image: mukeshr29/project-9:v1.46
         imagePullPolicy: Always
         resources:
           limits:
