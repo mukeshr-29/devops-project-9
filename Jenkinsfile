@@ -52,7 +52,7 @@ pipeline{
                     def destroy = false
                     try{
                        input message: 'please confirm the destroy to delete the deployments', ok: 'Ready to destroy the config' 
-                       destroy - true
+                       destroy = true
                     }
                     catch(err){
                         destroy = false
